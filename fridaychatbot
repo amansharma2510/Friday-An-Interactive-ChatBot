@@ -1,0 +1,21 @@
+import streamlit as st
+
+# Create a title for the chatbot
+st.title(" Friday Chatbot")
+
+# Create a text input for user input
+user_input = st.text_input("Enter your message:")
+
+# Define the responses for the chatbot
+responses = {
+    "what is your name ?":"i am Friday ",
+    "hi": "Hello! How can I help you today?",
+    "how are you": "I'm doing well, thank you for asking.",
+    "bye": "Goodbye! Have a great day."
+}
+
+# Get the response based on user input
+if user_input.lower() in responses:
+    st.text(f"Bot: {responses[user_input.lower()]}")
+else:
+    st.text("Bot: I'm sorry, I don't understand that.")
