@@ -1,21 +1,57 @@
 import streamlit as st
+import openai
+import os
+from dotenv import load_dotenv
 
-# Create a title for the chatbot
-st.title(" Friday Chatbot")
+# Load environment variables from .env file
+load_dotenv()
 
-# Create a text input for user input
-user_input = st.text_input("Enter your message:")
+# Set OpenAI API key
+openai.api_key = os.getenv("sk-proj-Gvpoqe7Z80CrkGWxjAS9CYy__oqyKkWHBBjX0QAdw1qtlYHfJBGxriOyiFT3BlbkFJuL-ERqyQSWp8LR2kvAHJkpjNiPXQC01A3a-aVgQcEMyLkgN38kicCNPwA")
 
-# Define the responses for the chatbot
-responses = {
-    "what is your name ?":"i am Friday ",
-    "hi": "Hello! How can I help you today?",
-    "how are you": "I'm doing well, thank you for asking.",
-    "bye": "Goodbye! Have a great day."
-}
+# Initialize the conversation history
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-# Get the response based on user input
-if user_input.lower() in responses:
-    st.text(f"Bot: {responses[user_input.lower()]}")
-else:
-    st.text("Bot: I'm sorry, I don't understand that.")
+# Function to get a response from the OpenAI API
+def get_openai_response(prompt):
+    response = openai.Completion.create(
+        engine="text-davinci-003",  # Use the appropriate model
+        prompt=prompt,
+        max_tokens=150,
+        temperature=0.7,
+    )
+    return response.choices[0].text.strip()
+
+# Streamlit app layout
+st.title("AI Chatbot")
+
+st.write("Ask me anything!")
+
+# User input
+user_input = st.text_input("You:", "")
+
+if st.button("Send") and user_input:
+    # Add user input to the session state
+    st.session_state.messages.append({"role": "user", "content": user_input})
+
+    # Prepare the prompt for the API call
+    prompt = ""
+    for message in st.session_state.messages:
+        if message["role"] == "user":
+            prompt += f"User: {message['content']}\n"
+        else:
+            prompt += f"Bot: {message['content']}\n"
+
+    # Get the bot response
+    bot_response = get_openai_response(prompt)
+
+    # Add the bot response to the session state
+    st.session_state.messages.append({"role": "bot", "content": bot_response})
+
+    # Display the conversation
+    for message in st.session_state.messages:
+        if message["role"] == "user":
+            st.write(f"**You:** {message['content']}")
+        else:
+            st.write(f"**Bot:** {message['content']}")
